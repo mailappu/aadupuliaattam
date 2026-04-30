@@ -17,6 +17,9 @@ const Play = () => {
   const [params] = useSearchParams();
   const initialMode = (params.get("mode") as Mode | null) ?? "vs-ai-tigers";
   const initialDifficulty = (params.get("difficulty") as "easy" | "medium" | "hard" | null) ?? "medium";
+  const p1Name = params.get("p1") ?? "Player 1";
+  const p2Name = params.get("p2") ?? "Player 2";
+  const p1Side = (params.get("p1side") as "goat" | "tiger" | null) ?? "goat";
   const game = useGame(initialMode, initialDifficulty);
   const [overOpen, setOverOpen] = useState(false);
   const [tutOpen, setTutOpen] = useState(false);
