@@ -7,10 +7,11 @@ import { OverlayPanel } from "@/components/game/OverlayPanel";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { Tutorial } from "@/components/game/Tutorial";
 import { MuteToggle } from "@/components/game/MuteToggle";
+import { SettingsDialog } from "@/components/game/SettingsDialog";
 import { useGame, type Mode } from "@/hooks/useGame";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowLeft, GraduationCap, Settings2 } from "lucide-react";
+import { ArrowLeft, GraduationCap, Wrench } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Play = () => {
@@ -61,6 +62,7 @@ const Play = () => {
           <Button variant="ghost" size="icon" onClick={() => setTutOpen(true)} aria-label="Tutorial">
             <GraduationCap className="h-5 w-5" />
           </Button>
+          <SettingsDialog settings={game.settings} onChange={game.setSettings} />
         </div>
       </header>
 
@@ -126,7 +128,7 @@ const Play = () => {
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button size="lg" className="bg-teak-gradient shadow-elev gap-2 pointer-events-auto">
-                <Settings2 className="h-4 w-4" /> Controls
+                <Wrench className="h-4 w-4" /> Controls
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-3xl">
