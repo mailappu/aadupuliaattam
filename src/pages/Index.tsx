@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Bot, Users, BookOpen, GraduationCap } from "lucide-react";
+import { Bot, Users, UserPlus, BookOpen, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { Tutorial } from "@/components/game/Tutorial";
+import { PlayWithAIDialog } from "@/components/game/PlayWithAIDialog";
+import { InviteFriendDialog } from "@/components/game/InviteFriendDialog";
 
 const Index = () => {
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
@@ -28,25 +32,44 @@ const Index = () => {
       </div>
 
       <nav className="w-full max-w-md space-y-3 animate-scale-in" aria-label="Game modes">
-        <Button asChild size="lg" className="w-full h-14 text-base bg-teak-gradient shadow-soft justify-start gap-3">
-          <Link to="/play?mode=vs-ai-tigers">
-            <Bot className="h-5 w-5" /> Play vs AI <span className="text-xs opacity-80 ml-auto">(you are 🐐 goats)</span>
-          </Link>
+        <Button
+          onClick={() => setAiOpen(true)}
+          size="lg"
+          className="w-full h-14 text-base bg-teak-gradient shadow-soft justify-start gap-3"
+        >
+          <Bot className="h-5 w-5" />
+          <span>Play with AI</span>
         </Button>
-        <Button asChild size="lg" variant="outline" className="w-full h-14 text-base bg-card/70 justify-start gap-3 border-2">
-          <Link to="/play?mode=vs-ai-goats">
-            <Bot className="h-5 w-5 text-accent" /> Play vs AI <span className="text-xs opacity-70 ml-auto">(you are 🐅 tigers)</span>
-          </Link>
-        </Button>
-        <Button asChild size="lg" variant="outline" className="w-full h-14 text-base bg-card/70 justify-start gap-3 border-2">
+
+        <Button
+          asChild
+          size="lg"
+          variant="outline"
+          className="w-full h-14 text-base bg-card/70 justify-start gap-3 border-2"
+        >
           <Link to="/play?mode=pass-and-play">
-            <Users className="h-5 w-5 text-accent" /> Pass &amp; Play
-            <span className="text-xs opacity-70 ml-auto">2 players, 1 device</span>
+            <Users className="h-5 w-5 text-accent" />
+            <span>Pass &amp; Play</span>
           </Link>
+        </Button>
+
+        <Button
+          onClick={() => setInviteOpen(true)}
+          size="lg"
+          variant="outline"
+          className="w-full h-auto py-3 text-base bg-card/70 justify-start gap-3 border-2"
+        >
+          <UserPlus className="h-5 w-5 text-accent" />
+          <div className="flex flex-col items-start leading-tight">
+            <span>Invite a Friend</span>
+            <span className="text-[11px] font-normal text-muted-foreground">
+              Share a link to play together
+            </span>
+          </div>
         </Button>
       </nav>
 
-      <div className="mt-8 flex items-center gap-8 text-sm">
+      <div className="mt-8 flex items-center gap-10 text-sm">
         <button
           onClick={() => setTutorialOpen(true)}
           className="flex flex-col items-center gap-1.5 hover:text-accent transition-colors"
@@ -54,7 +77,10 @@ const Index = () => {
           <GraduationCap className="h-6 w-6 text-accent" />
           <span>Tutorial</span>
         </button>
-        <Link to="/rules" className="flex flex-col items-center gap-1.5 hover:text-accent transition-colors">
+        <Link
+          to="/rules"
+          className="flex flex-col items-center gap-1.5 hover:text-accent transition-colors"
+        >
           <BookOpen className="h-6 w-6 text-accent" />
           <span>How to Play</span>
         </Link>
@@ -65,6 +91,8 @@ const Index = () => {
       </footer>
 
       <Tutorial open={tutorialOpen} onOpenChange={setTutorialOpen} />
+      <PlayWithAIDialog open={aiOpen} onOpenChange={setAiOpen} />
+      <InviteFriendDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </main>
   );
 };
