@@ -66,6 +66,32 @@ const Play = () => {
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
         <section className="animate-fade-in">
+          {initialMode === "pass-and-play" && (
+            <div className="mb-3 grid grid-cols-2 gap-2">
+              {([
+                { name: p1Name, side: p1Side },
+                { name: p2Name, side: p1Side === "goat" ? "tiger" : "goat" },
+              ] as { name: string; side: "goat" | "tiger" }[]).map((p) => {
+                const active = game.state.turn === p.side && !game.state.winner;
+                return (
+                  <div
+                    key={p.name + p.side}
+                    className={`rounded-xl border-2 p-2.5 flex items-center gap-2 transition-all ${
+                      active ? "border-accent bg-accent/10 shadow-soft" : "border-border bg-card/50"
+                    }`}
+                  >
+                    <span className="text-2xl" aria-hidden>{p.side === "goat" ? "🐐" : "🐅"}</span>
+                    <div className="min-w-0">
+                      <p className="font-display text-sm leading-tight truncate">{p.name}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {p.side === "goat" ? "Goats" : "Tigers"}{active ? " · turn" : ""}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <Board
             state={game.state}
             selected={game.selected}
