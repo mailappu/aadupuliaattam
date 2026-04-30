@@ -11,6 +11,7 @@ import {
 import { chooseAIMove, type Difficulty } from "@/game/ai";
 import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
+import { planAnimation, type AnimationStep } from "@/animations/animationEngine";
 
 const STORAGE_KEY = "apa.savegame.v1";
 
@@ -33,6 +34,7 @@ export interface UseGameReturn {
   isAIThinking: boolean;
   lastMove: Move | null;
   capturedAt: NodeId | null;            // node id where a capture flash should play
+  animation: AnimationStep | null;      // visual replay descriptor for the latest move
   onNodeClick: (id: NodeId) => void;
   newGame: (mode?: Mode, difficulty?: Difficulty) => void;
   requestHint: () => void;
@@ -64,6 +66,7 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
   const [hint, setHint] = useState<Move | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [capturedAt, setCapturedAt] = useState<NodeId | null>(null);
+  const [animation, setAnimation] = useState<AnimationStep | null>(null);
   const aiTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasHydrated = useRef(false);
 
@@ -118,11 +121,22 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
   const lastMove = state.history.length ? state.history[state.history.length - 1] : null;
 
   const performMove = useCallback((move: Move) => {
+    // Plan visual replay BEFORE state mutates so the animation layer can paint
+    // origin/destination/captured nodes in the correct frame.
+    const step = planAnimation(move);
+    setAnimation(step);
+    if (step.capturedAt !== null) setCapturedAt(step.capturedAt);
+    // Clear visual cues after the animation duration completes.
+    window.setTimeout(() => {
+      setAnimation((cur) => (cur && cur.id === step.id ? null : cur));
+    }, step.durationMs + 80);
+    if (step.capturedAt !== null) {
+      window.setTimeout(() => setCapturedAt(null), step.durationMs + 80);
+    }
+
     setState((prev) => {
       const next = applyMove(prev, move);
       if (move.kind === "capture") {
-        setCapturedAt(move.over);
-        setTimeout(() => setCapturedAt(null), 600);
         sfx.capture();
         vibrate([15, 25, 30]);
       } else if (move.kind === "place") {
@@ -248,6 +262,7 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     isAIThinking,
     lastMove,
     capturedAt,
+    animation,
     onNodeClick,
     newGame,
     requestHint,

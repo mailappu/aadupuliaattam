@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { ADJACENCY, NODES, type NodeId } from "@/game/board";
 import type { GameState, Move } from "@/game/engine";
 import { vulnerableGoats } from "@/game/ai";
+import type { AnimationStep } from "@/animations/animationEngine";
 import { cn } from "@/lib/utils";
 
 interface BoardProps {
@@ -13,6 +14,7 @@ interface BoardProps {
   showOverlay: boolean;
   capturedAt: NodeId | null;
   lastMove: Move | null;
+  animation?: AnimationStep | null;
   onNodeClick: (id: NodeId) => void;
 }
 
@@ -78,6 +80,7 @@ function BoardImpl({
   showOverlay,
   capturedAt,
   lastMove,
+  animation = null,
   onNodeClick,
 }: BoardProps) {
   const destSet = new Map(destinations.map((d) => [d.to, d.capture]));
@@ -137,6 +140,36 @@ function BoardImpl({
             x1={NODES[lastFrom].x} y1={NODES[lastFrom].y}
             x2={NODES[lastTo].x} y2={NODES[lastTo].y}
             stroke="hsl(var(--accent))" strokeWidth={0.7} strokeDasharray="1.5 1.2" opacity={0.7}
+          />
+        )}
+
+        {/* Animation feedback: depart pulse on origin, land glow on destination.
+            Keyed by step.id so React remounts the circles per move and replays
+            the CSS animations cleanly. Pure visual; no engine dependency. */}
+        {animation && animation.origin !== null && (
+          <circle
+            key={`depart-${animation.id}`}
+            cx={NODES[animation.origin].x}
+            cy={NODES[animation.origin].y}
+            r={2.6}
+            fill="none"
+            stroke={animation.arc === "lunge" ? "hsl(var(--node-threat))" : "hsl(var(--node-selected))"}
+            strokeWidth={0.7}
+            className="animate-depart-pulse origin-center pointer-events-none"
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          />
+        )}
+        {animation && (
+          <circle
+            key={`land-${animation.id}`}
+            cx={NODES[animation.destination].x}
+            cy={NODES[animation.destination].y}
+            r={2.4}
+            fill="none"
+            stroke="hsl(var(--node-highlight))"
+            strokeWidth={0.7}
+            className="animate-land-glow origin-center pointer-events-none"
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
           />
         )}
 
