@@ -13,7 +13,7 @@ import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
 import { planAnimation, type AnimationStep } from "@/animations/animationEngine";
 
-const STORAGE_KEY = "apa.savegame.v1";
+const STORAGE_KEY = "apa.savegame.v2";
 
 export type Mode = "vs-ai-tigers" | "vs-ai-goats" | "pass-and-play";
 
@@ -114,6 +114,19 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
 
   const aiPlayer = aiPlayerFor(settings.mode);
   const humanPlayer = humanPlayerFor(settings.mode);
+
+  // State-leak guard: clear selection/hint whenever the turn flips OR the
+  // currently selected node no longer holds the active player's piece. This
+  // prevents stale highlights surviving across AI moves, undos, or captures
+  // that removed the selected piece.
+  useEffect(() => {
+    if (selected === null) return;
+    const ownPiece = state.turn === "goat" ? "goat" : "tiger";
+    if (state.cells[selected] !== ownPiece) {
+      setSelected(null);
+      setHint(null);
+    }
+  }, [state.turn, state.cells, selected]);
 
   const destinations = useMemo(
     () => (selected !== null ? legalDestinations(state, selected) : []),
@@ -253,6 +266,12 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     setSelected(null);
     setHint(null);
     setCapturedAt(null);
+    setAnimation(null);
+    setIsAIThinking(false);
+    if (aiTimeout.current) {
+      clearTimeout(aiTimeout.current);
+      aiTimeout.current = null;
+    }
     setSettings((s) => ({
       ...s,
       mode: mode ?? s.mode,
