@@ -120,6 +120,34 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     [selected, state],
   );
 
+  // Strategy overlay: score each candidate destination via a 1-ply lookahead.
+  // Cheap (≤ ~6 destinations × one applyMove + evaluate). Skipped unless the
+  // overlay is enabled and the player has a piece selected.
+  const scoredDestinations = useMemo(() => {
+    if (!settings.showOverlay || selected === null) return [];
+    const player: Player = state.turn;
+    const sign = player === "tiger" ? 1 : -1;
+    const raw = destinations.map((d) => {
+      const move: Move = d.capture
+        ? // we know the over-node from legalMoves; recover by searching
+          (legalMoves(state).find(
+            (m) => m.kind === "capture" && m.from === selected && m.to === d.to,
+          ) as Move)
+        : { kind: "move", from: selected, to: d.to };
+      const score = sign * evaluate(applyMove(state, move));
+      return { to: d.to, capture: d.capture, score };
+    });
+    if (raw.length === 0) return [];
+    const lo = Math.min(...raw.map((r) => r.score));
+    const hi = Math.max(...raw.map((r) => r.score));
+    const span = hi - lo || 1;
+    return raw.map((r) => ({
+      to: r.to,
+      capture: r.capture,
+      quality: (r.score - lo) / span, // 0 = worst, 1 = best
+    }));
+  }, [settings.showOverlay, selected, state, destinations]);
+
   const lastMove = state.history.length ? state.history[state.history.length - 1] : null;
 
   const performMove = useCallback((move: Move) => {
@@ -260,6 +288,7 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     setSettings,
     selected,
     destinations,
+    scoredDestinations,
     hint,
     isAIThinking,
     lastMove,
