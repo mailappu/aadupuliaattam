@@ -9,6 +9,7 @@ import {
   type Player,
 } from "@/game/engine";
 import { chooseAIMove, type Difficulty } from "@/game/ai";
+import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
 
 const STORAGE_KEY = "apa.savegame.v1";
@@ -105,12 +106,26 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
       if (move.kind === "capture") {
         setCapturedAt(move.over);
         setTimeout(() => setCapturedAt(null), 600);
+        sfx.capture();
+        vibrate([15, 25, 30]);
+      } else if (move.kind === "place") {
+        sfx.place();
+        vibrate(8);
+      } else {
+        sfx.move();
+        vibrate(6);
+      }
+      if (next.winner) {
+        if (humanPlayerFor(settings.mode) === next.winner) sfx.win();
+        else if (humanPlayerFor(settings.mode)) sfx.lose();
+        else sfx.win();
+        vibrate([20, 40, 20, 40, 60]);
       }
       return next;
     });
     setSelected(null);
     setHint(null);
-  }, []);
+  }, [settings.mode]);
 
   // AI turn driver
   useEffect(() => {

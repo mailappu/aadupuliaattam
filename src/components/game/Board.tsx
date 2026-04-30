@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { ADJACENCY, NODES, type NodeId } from "@/game/board";
 import type { GameState, Move } from "@/game/engine";
 import { vulnerableGoats } from "@/game/ai";
@@ -19,7 +19,6 @@ interface BoardProps {
 const VIEW_W = 100;
 const VIEW_H = 110;
 
-// Build de-duplicated edges for rendering lines
 const RENDER_EDGES: Array<[NodeId, NodeId]> = (() => {
   const seen = new Set<string>();
   const out: Array<[NodeId, NodeId]> = [];
@@ -34,6 +33,42 @@ const RENDER_EDGES: Array<[NodeId, NodeId]> = (() => {
   return out;
 })();
 
+interface VisualPiece {
+  id: string;          // stable id across renders so SVG can transition
+  kind: "tiger" | "goat";
+  node: NodeId;        // current logical node
+}
+
+/** Derive piece list with stable ids by minimum-distance assignment to prior pieces. */
+function diffPieces(prev: VisualPiece[], state: GameState): VisualPiece[] {
+  const desired: { kind: "tiger" | "goat"; node: NodeId }[] = [];
+  for (let i = 0; i < state.cells.length; i++) {
+    const c = state.cells[i];
+    if (c === "tiger" || c === "goat") desired.push({ kind: c, node: i });
+  }
+  const next: VisualPiece[] = [];
+  const usedPrev = new Set<string>();
+  // Greedy: for each desired piece, take nearest unused prev of same kind.
+  for (const d of desired) {
+    let bestKey = "";
+    let bestDist = Infinity;
+    for (const p of prev) {
+      if (p.kind !== d.kind) continue;
+      if (usedPrev.has(p.id)) continue;
+      const a = NODES[p.node], b = NODES[d.node];
+      const dist = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+      if (dist < bestDist) { bestDist = dist; bestKey = p.id; }
+    }
+    if (bestKey) {
+      usedPrev.add(bestKey);
+      next.push({ id: bestKey, kind: d.kind, node: d.node });
+    } else {
+      next.push({ id: `${d.kind}-${Math.random().toString(36).slice(2, 8)}`, kind: d.kind, node: d.node });
+    }
+  }
+  return next;
+}
+
 function BoardImpl({
   state,
   selected,
@@ -47,15 +82,37 @@ function BoardImpl({
 }: BoardProps) {
   const destSet = new Map(destinations.map((d) => [d.to, d.capture]));
   const vulnerable = showOverlay ? new Set(vulnerableGoats(state)) : new Set<NodeId>();
-
   const hintFrom = hint && "from" in hint ? hint.from : null;
   const hintTo = hint && "to" in hint ? hint.to : null;
-
   const lastFrom = lastMove && "from" in lastMove ? lastMove.from : null;
   const lastTo = lastMove && "to" in lastMove ? lastMove.to : null;
 
+  // Maintain stable visual pieces for smooth glide tweens.
+  const prevRef = useRef<VisualPiece[]>([]);
+  const pieces = useMemo(() => {
+    const next = diffPieces(prevRef.current, state);
+    prevRef.current = next;
+    return next;
+  }, [state]);
+
+  // Confetti / particles container — driven by capturedAt
+  const [particles, setParticles] = useState<{ id: number; x: number; y: number; angle: number }[]>([]);
+  useEffect(() => {
+    if (capturedAt === null) return;
+    const n = NODES[capturedAt];
+    const burst = Array.from({ length: 10 }).map((_, i) => ({
+      id: Date.now() + i,
+      x: n.x,
+      y: n.y,
+      angle: (i / 10) * Math.PI * 2,
+    }));
+    setParticles(burst);
+    const t = setTimeout(() => setParticles([]), 700);
+    return () => clearTimeout(t);
+  }, [capturedAt]);
+
   return (
-    <div className="relative w-full max-w-[560px] aspect-[100/110] mx-auto">
+    <div className="relative w-full max-w-[560px] aspect-[100/110] mx-auto select-none">
       <div
         className="absolute inset-0 rounded-[2rem] paper-texture shadow-elev"
         style={{ background: "hsl(var(--board-bg))", border: "1px solid hsl(var(--border))" }}
@@ -63,7 +120,7 @@ function BoardImpl({
       />
       <svg
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-        className="relative w-full h-full"
+        className="relative w-full h-full touch-manipulation"
         role="img"
         aria-label="Aadu Puli Attam game board"
       >
@@ -77,33 +134,23 @@ function BoardImpl({
         {/* Last-move trace */}
         {lastFrom !== null && lastTo !== null && (
           <line
-            x1={NODES[lastFrom].x}
-            y1={NODES[lastFrom].y}
-            x2={NODES[lastTo].x}
-            y2={NODES[lastTo].y}
-            stroke="hsl(var(--accent))"
-            strokeWidth={0.7}
-            strokeDasharray="1.5 1.2"
-            opacity={0.7}
+            x1={NODES[lastFrom].x} y1={NODES[lastFrom].y}
+            x2={NODES[lastTo].x} y2={NODES[lastTo].y}
+            stroke="hsl(var(--accent))" strokeWidth={0.7} strokeDasharray="1.5 1.2" opacity={0.7}
           />
         )}
 
         {/* Hint trace */}
         {showHints && hintFrom !== null && hintTo !== null && (
           <line
-            x1={NODES[hintFrom].x}
-            y1={NODES[hintFrom].y}
-            x2={NODES[hintTo].x}
-            y2={NODES[hintTo].y}
-            stroke="hsl(var(--node-highlight))"
-            strokeWidth={0.9}
-            strokeDasharray="1.2 1.2"
+            x1={NODES[hintFrom].x} y1={NODES[hintFrom].y}
+            x2={NODES[hintTo].x} y2={NODES[hintTo].y}
+            stroke="hsl(var(--node-highlight))" strokeWidth={0.9} strokeDasharray="1.2 1.2"
           />
         )}
 
-        {/* Nodes */}
+        {/* Click targets + node markers */}
         {NODES.map((n) => {
-          const cell = state.cells[n.id];
           const isSelected = selected === n.id;
           const dest = destSet.get(n.id);
           const isLegalDest = showHints && dest !== undefined;
@@ -112,100 +159,96 @@ function BoardImpl({
           const isVulnerable = vulnerable.has(n.id);
 
           return (
-            <g
-              key={n.id}
-              transform={`translate(${n.x} ${n.y})`}
-              className="cursor-pointer focus:outline-none"
-              onClick={() => onNodeClick(n.id)}
-              tabIndex={0}
-              role="button"
-              aria-label={`Node ${n.id}, ${cell}`}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onNodeClick(n.id);
-                }
-              }}
-            >
-              {/* Hover/legal-destination ring */}
+            <g key={`hit-${n.id}`} transform={`translate(${n.x} ${n.y})`}>
+              {/* Larger transparent hit area for touch */}
+              <circle
+                r={5}
+                fill="transparent"
+                onClick={() => onNodeClick(n.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNodeClick(n.id); }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Node ${n.id}`}
+                style={{ cursor: "pointer", outline: "none" }}
+              />
               {(isLegalDest || isHintTarget) && (
                 <circle
                   r={3.6}
                   fill="none"
                   stroke={isCaptureDest ? "hsl(var(--node-threat))" : "hsl(var(--node-highlight))"}
                   strokeWidth={0.6}
-                  className="animate-pulse-ring origin-center"
+                  className="animate-pulse-ring origin-center pointer-events-none"
                   style={{ transformBox: "fill-box" }}
                 />
               )}
-
-              {/* Vulnerable goat overlay marker */}
-              {isVulnerable && cell === "goat" && (
-                <circle r={3.4} fill="none" stroke="hsl(var(--node-threat))" strokeWidth={0.5} strokeDasharray="0.8 0.6" />
+              {isVulnerable && state.cells[n.id] === "goat" && (
+                <circle r={3.4} fill="none" stroke="hsl(var(--node-threat))" strokeWidth={0.5} strokeDasharray="0.8 0.6" className="pointer-events-none" />
               )}
-
-              {/* Base node */}
               <circle
-                r={2.2}
+                r={2.0}
                 fill="hsl(var(--node))"
                 stroke="hsl(var(--node-ring))"
-                strokeWidth={0.4}
-                className={cn(isSelected && "drop-shadow")}
+                strokeWidth={0.35}
+                className={cn("pointer-events-none", isSelected && "drop-shadow")}
               />
-
-              {/* Pieces */}
-              {cell === "tiger" && (
-                <g className="origin-center" style={{ transformBox: "fill-box" }}>
-                  <circle
-                    r={2.6}
-                    fill="hsl(var(--tiger))"
-                    stroke="hsl(var(--tiger-ink))"
-                    strokeWidth={0.4}
-                    style={{ filter: "drop-shadow(0 0.4px 0.4px hsl(0 0% 0% / 0.4))" }}
-                  />
-                  <text
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fontSize={2.6}
-                    fill="hsl(var(--tiger-ink))"
-                    style={{ pointerEvents: "none", fontWeight: 700 }}
-                  >
-                    🐅
-                  </text>
-                </g>
-              )}
-              {cell === "goat" && capturedAt !== n.id && (
-                <g className="origin-center" style={{ transformBox: "fill-box" }}>
-                  <circle
-                    r={2.4}
-                    fill="hsl(var(--goat))"
-                    stroke="hsl(var(--goat-ink))"
-                    strokeWidth={0.35}
-                  />
-                  <text
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fontSize={2.4}
-                    style={{ pointerEvents: "none" }}
-                  >
-                    🐐
-                  </text>
-                </g>
-              )}
-              {/* Capture flash */}
-              {capturedAt === n.id && (
-                <g className="origin-center animate-capture-flash" style={{ transformBox: "fill-box" }}>
-                  <circle r={2.6} fill="hsl(var(--node-threat))" opacity={0.7} />
-                </g>
-              )}
-
-              {/* Selected ring */}
               {isSelected && (
-                <circle r={3.0} fill="none" stroke="hsl(var(--node-selected))" strokeWidth={0.6} />
+                <circle r={3.0} fill="none" stroke="hsl(var(--node-selected))" strokeWidth={0.6} className="pointer-events-none" />
               )}
             </g>
           );
         })}
+
+        {/* Pieces — rendered with stable ids and CSS transitions for glide tweens */}
+        <g>
+          {pieces.map((p) => {
+            const n = NODES[p.node];
+            const isCapturing = capturedAt !== null && p.kind === "goat" && p.node === capturedAt;
+            return (
+              <g
+                key={p.id}
+                style={{
+                  transform: `translate(${n.x}px, ${n.y}px)`,
+                  transition: "transform 320ms cubic-bezier(0.34, 1.4, 0.64, 1)",
+                }}
+                className={cn("pointer-events-none", isCapturing && "animate-capture-flash origin-center")}
+              >
+                {p.kind === "tiger" ? (
+                  <>
+                    <circle r={2.7} fill="hsl(var(--tiger))" stroke="hsl(var(--tiger-ink))" strokeWidth={0.4} />
+                    <text textAnchor="middle" dominantBaseline="central" fontSize={2.6} style={{ fontWeight: 700 }}>🐅</text>
+                  </>
+                ) : (
+                  <>
+                    <circle r={2.4} fill="hsl(var(--goat))" stroke="hsl(var(--goat-ink))" strokeWidth={0.35} />
+                    <text textAnchor="middle" dominantBaseline="central" fontSize={2.4}>🐐</text>
+                  </>
+                )}
+              </g>
+            );
+          })}
+        </g>
+
+        {/* Capture particles */}
+        <g>
+          {particles.map((p) => {
+            const dx = Math.cos(p.angle) * 7;
+            const dy = Math.sin(p.angle) * 7;
+            return (
+              <circle
+                key={p.id}
+                r={0.9}
+                fill="hsl(var(--node-threat))"
+                style={{
+                  transform: `translate(${p.x + dx}px, ${p.y + dy}px)`,
+                  opacity: 0,
+                  transition: "transform 600ms ease-out, opacity 600ms ease-out",
+                }}
+              />
+            );
+          })}
+        </g>
       </svg>
     </div>
   );
