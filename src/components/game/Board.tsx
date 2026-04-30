@@ -134,6 +134,18 @@ function BoardImpl({
         role="img"
         aria-label="Aadu Puli Attam game board"
       >
+        {/* Reusable gradients for piece sheen */}
+        <defs>
+          <radialGradient id="tigerSheen" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stopColor="hsl(40 80% 75%)" stopOpacity="0.55" />
+            <stop offset="60%" stopColor="hsl(var(--tiger))" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="goatSheen" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stopColor="hsl(40 60% 100%)" stopOpacity="0.85" />
+            <stop offset="65%" stopColor="hsl(var(--goat))" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
         {/* Lines */}
         <g stroke="hsl(var(--board-line))" strokeWidth={0.45} strokeLinecap="round">
           {RENDER_EDGES.map(([a, b]) => (
@@ -288,11 +300,13 @@ function BoardImpl({
           );
         })}
 
-        {/* Pieces — rendered with stable ids and CSS transitions for glide tweens */}
+        {/* Pieces — stable ids + CSS transitions for glide; soft sheen
+            gradient + idle float on the active player's pieces only. */}
         <g>
           {pieces.map((p) => {
             const n = NODES[p.node];
             const isCapturing = capturedAt !== null && p.kind === "goat" && p.node === capturedAt;
+            const isActive = state.turn === p.kind && !state.winner;
             return (
               <g
                 key={p.id}
@@ -302,17 +316,24 @@ function BoardImpl({
                 }}
                 className={cn("pointer-events-none", isCapturing && "animate-capture-flash origin-center")}
               >
-                {p.kind === "tiger" ? (
-                  <>
-                    <circle r={2.7} fill="hsl(var(--tiger))" stroke="hsl(var(--tiger-ink))" strokeWidth={0.4} />
-                    <text textAnchor="middle" dominantBaseline="central" fontSize={2.6} style={{ fontWeight: 700 }}>🐅</text>
-                  </>
-                ) : (
-                  <>
-                    <circle r={2.4} fill="hsl(var(--goat))" stroke="hsl(var(--goat-ink))" strokeWidth={0.35} />
-                    <text textAnchor="middle" dominantBaseline="central" fontSize={2.4}>🐐</text>
-                  </>
-                )}
+                <g
+                  className={cn(isActive && !isCapturing && "animate-float-y")}
+                  style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                >
+                  {p.kind === "tiger" ? (
+                    <>
+                      <circle r={2.7} fill="hsl(var(--tiger))" stroke="hsl(var(--tiger-ink))" strokeWidth={0.4} />
+                      <circle r={2.7} fill="url(#tigerSheen)" />
+                      <text textAnchor="middle" dominantBaseline="central" fontSize={2.6} style={{ fontWeight: 700 }}>🐅</text>
+                    </>
+                  ) : (
+                    <>
+                      <circle r={2.4} fill="hsl(var(--goat))" stroke="hsl(var(--goat-ink))" strokeWidth={0.35} />
+                      <circle r={2.4} fill="url(#goatSheen)" />
+                      <text textAnchor="middle" dominantBaseline="central" fontSize={2.4}>🐐</text>
+                    </>
+                  )}
+                </g>
               </g>
             );
           })}

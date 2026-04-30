@@ -236,7 +236,10 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
       // Movement / capture phase
       if (selected === null) {
         const ownPiece = state.turn === "goat" ? "goat" : "tiger";
-        if (state.cells[id] === ownPiece) setSelected(id);
+        if (state.cells[id] === ownPiece) {
+          setSelected(id);
+          sfx.select();
+        }
         return;
       }
 
@@ -249,6 +252,7 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
       const ownPiece = state.turn === "goat" ? "goat" : "tiger";
       if (state.cells[id] === ownPiece) {
         setSelected(id);
+        sfx.select();
         return;
       }
       // attempt move
@@ -283,7 +287,10 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     if (state.phase === "ended") return;
     const player: Player = state.turn;
     const decision = chooseAIMove(state, player, "hard");
-    if (decision) setHint(decision.move);
+    if (decision) {
+      setHint(decision.move);
+      sfx.hint();
+    }
   }, [state]);
 
   const undo = useCallback(() => {
