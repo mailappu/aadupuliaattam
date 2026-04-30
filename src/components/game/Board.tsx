@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { ADJACENCY, NODES, type NodeId } from "@/game/board";
 import type { GameState, Move } from "@/game/engine";
 import { vulnerableGoats } from "@/game/ai";
+import type { AnimationStep } from "@/animations/animationEngine";
 import { cn } from "@/lib/utils";
 
 interface BoardProps {
@@ -13,6 +14,7 @@ interface BoardProps {
   showOverlay: boolean;
   capturedAt: NodeId | null;
   lastMove: Move | null;
+  animation: AnimationStep | null;
   onNodeClick: (id: NodeId) => void;
 }
 
