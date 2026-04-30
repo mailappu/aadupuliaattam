@@ -128,7 +128,7 @@ const Play = () => {
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button size="lg" className="bg-teak-gradient shadow-elev gap-2 pointer-events-auto">
-                <Settings2 className="h-4 w-4" /> Controls
+                <Wrench className="h-4 w-4" /> Controls
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-3xl">
