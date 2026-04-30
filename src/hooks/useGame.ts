@@ -115,17 +115,24 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
   const aiPlayer = aiPlayerFor(settings.mode);
   const humanPlayer = humanPlayerFor(settings.mode);
 
-  // State-leak guard: clear selection/hint whenever the turn flips OR the
-  // currently selected node no longer holds the active player's piece. This
-  // prevents stale highlights surviving across AI moves, undos, or captures
-  // that removed the selected piece.
+  // State-leak guard: clear selection/hint whenever the turn flips. The
+  // selection always belongs to the player who just acted, so once turn
+  // changes it is always stale. Also clear if the underlying piece is gone
+  // (e.g. captured during AI's reply). Tracks last-seen turn via ref to
+  // avoid clearing on unrelated state updates.
+  const lastTurnRef = useRef<Player>(state.turn);
   useEffect(() => {
-    if (selected === null) return;
-    const ownPiece = state.turn === "goat" ? "goat" : "tiger";
-    if (state.cells[selected] !== ownPiece) {
+    if (selected === null) {
+      lastTurnRef.current = state.turn;
+      return;
+    }
+    const turnFlipped = lastTurnRef.current !== state.turn;
+    const pieceGone = state.cells[selected] !== state.turn;
+    if (turnFlipped || pieceGone) {
       setSelected(null);
       setHint(null);
     }
+    lastTurnRef.current = state.turn;
   }, [state.turn, state.cells, selected]);
 
   const destinations = useMemo(
@@ -140,12 +147,15 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     if (!settings.showOverlay || selected === null) return [];
     const player: Player = state.turn;
     const sign = player === "tiger" ? 1 : -1;
+    // Compute capture moves from this square ONCE (was O(n²) before).
+    const allMoves = destinations.some((d) => d.capture) ? legalMoves(state) : [];
+    const captureLookup = new Map<NodeId, Move>();
+    for (const m of allMoves) {
+      if (m.kind === "capture" && m.from === selected) captureLookup.set(m.to, m);
+    }
     const raw = destinations.map((d) => {
       const move: Move = d.capture
-        ? // we know the over-node from legalMoves; recover by searching
-          (legalMoves(state).find(
-            (m) => m.kind === "capture" && m.from === selected && m.to === d.to,
-          ) as Move)
+        ? (captureLookup.get(d.to) as Move)
         : { kind: "move", from: selected, to: d.to };
       const score = sign * evaluate(applyMove(state, move));
       return { to: d.to, capture: d.capture, score };
@@ -201,7 +211,11 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     setHint(null);
   }, [settings.mode]);
 
-  // AI turn driver
+  // AI turn driver — fire only when it's actually the AI's turn (not on
+  // every state change). Use a ref to access latest state inside the
+  // timeout without re-subscribing the effect.
+  const stateRef = useRef(state);
+  stateRef.current = state;
   useEffect(() => {
     if (state.phase === "ended") return;
     if (!aiPlayer) return;
@@ -209,16 +223,15 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
 
     setIsAIThinking(true);
     aiTimeout.current = setTimeout(() => {
-      const decision = chooseAIMove(state, aiPlayer, settings.difficulty);
+      const decision = chooseAIMove(stateRef.current, aiPlayer, settings.difficulty);
       setIsAIThinking(false);
       if (decision) performMove(decision.move);
     }, 450);
 
     return () => {
       if (aiTimeout.current) clearTimeout(aiTimeout.current);
-      setIsAIThinking(false);
     };
-  }, [state, aiPlayer, settings.difficulty, performMove]);
+  }, [state.turn, state.phase, aiPlayer, settings.difficulty, performMove]);
 
   const onNodeClick = useCallback(
     (id: NodeId) => {
