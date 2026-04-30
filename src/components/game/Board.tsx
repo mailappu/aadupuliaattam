@@ -351,19 +351,21 @@ function BoardImpl({
           })}
         </g>
 
-        {/* Capture particles */}
+        {/* Capture particles — start at capture node, animate outward + fade. */}
         <g>
           {particles.map((p) => {
             const dx = Math.cos(p.angle) * 7;
             const dy = Math.sin(p.angle) * 7;
+            const tx = p.out ? p.x + dx : p.x;
+            const ty = p.out ? p.y + dy : p.y;
             return (
               <circle
                 key={p.id}
                 r={0.9}
                 fill="hsl(var(--node-threat))"
                 style={{
-                  transform: `translate(${p.x + dx}px, ${p.y + dy}px)`,
-                  opacity: 0,
+                  transform: `translate(${tx}px, ${ty}px)`,
+                  opacity: p.out ? 0 : 1,
                   transition: "transform 600ms ease-out, opacity 600ms ease-out",
                 }}
               />
