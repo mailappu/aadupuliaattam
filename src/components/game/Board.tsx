@@ -89,24 +89,32 @@ function BoardImpl({
   debug = false,
   onNodeClick,
 }: BoardProps) {
-  const destSet = new Map(destinations.map((d) => [d.to, d.capture]));
-  const scoreMap = new Map((scoredDestinations ?? []).map((d) => [d.to, d.quality]));
-  const vulnerable = showOverlay ? new Set(vulnerableGoats(state)) : new Set<NodeId>();
+  const destSet = useMemo(() => new Map(destinations.map((d) => [d.to, d.capture])), [destinations]);
+  const scoreMap = useMemo(
+    () => new Map((scoredDestinations ?? []).map((d) => [d.to, d.quality])),
+    [scoredDestinations],
+  );
+  const vulnerable = useMemo(
+    () => (showOverlay ? new Set(vulnerableGoats(state)) : new Set<NodeId>()),
+    [showOverlay, state],
+  );
   const hintFrom = hint && "from" in hint ? hint.from : null;
   const hintTo = hint && "to" in hint ? hint.to : null;
   const lastFrom = lastMove && "from" in lastMove ? lastMove.from : null;
   const lastTo = lastMove && "to" in lastMove ? lastMove.to : null;
 
-  // Maintain stable visual pieces for smooth glide tweens.
+  // Maintain stable visual pieces for smooth glide tweens. Compute pure in
+  // useMemo, then commit to the ref in an effect (no ref writes during render
+  // — safe under React StrictMode double-invocation).
   const prevRef = useRef<VisualPiece[]>([]);
-  const pieces = useMemo(() => {
-    const next = diffPieces(prevRef.current, state);
-    prevRef.current = next;
-    return next;
-  }, [state]);
+  const pieces = useMemo(() => diffPieces(prevRef.current, state), [state]);
+  useEffect(() => { prevRef.current = pieces; }, [pieces]);
 
-  // Confetti / particles container — driven by capturedAt
-  const [particles, setParticles] = useState<{ id: number; x: number; y: number; angle: number }[]>([]);
+  // Confetti / particles container — driven by capturedAt. Two-phase render:
+  // mount at origin opacity=1, then next frame flip flags so CSS transition
+  // animates outward + fades. Without the rAF flip the previous code just
+  // mounted invisible particles.
+  const [particles, setParticles] = useState<{ id: number; x: number; y: number; angle: number; out: boolean }[]>([]);
   useEffect(() => {
     if (capturedAt === null) return;
     const n = NODES[capturedAt];
@@ -115,10 +123,14 @@ function BoardImpl({
       x: n.x,
       y: n.y,
       angle: (i / 10) * Math.PI * 2,
+      out: false,
     }));
     setParticles(burst);
+    const raf = requestAnimationFrame(() => {
+      setParticles((cur) => cur.map((p) => ({ ...p, out: true })));
+    });
     const t = setTimeout(() => setParticles([]), 700);
-    return () => clearTimeout(t);
+    return () => { cancelAnimationFrame(raf); clearTimeout(t); };
   }, [capturedAt]);
 
   return (
