@@ -12,6 +12,7 @@ interface StatusPanelProps {
 export function StatusPanel({ state, isAIThinking }: StatusPanelProps) {
   const turnLabel = state.turn === "tiger" ? "Tigers" : "Goats";
   const remainingPlace = Math.max(0, 15 - state.goatsPlaced);
+  const isTiger = state.turn === "tiger";
 
   return (
     <Card className="p-4 shadow-soft bg-card/80 backdrop-blur-sm">
@@ -19,7 +20,21 @@ export function StatusPanel({ state, isAIThinking }: StatusPanelProps) {
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Turn</p>
           <h3 className="font-display text-2xl flex items-center gap-2">
-            <span aria-hidden>{state.turn === "tiger" ? "🐅" : "🐐"}</span>
+            <span className="relative inline-flex items-center justify-center" aria-hidden>
+              {/* Pulsing glow ring behind the active emoji */}
+              <span
+                key={state.turn /* remount → restart pulse on turn flip */}
+                className="absolute inset-0 -m-1 rounded-full animate-pulse-ring"
+                style={{
+                  background: isTiger
+                    ? "radial-gradient(circle, hsl(var(--tiger) / 0.45), transparent 65%)"
+                    : "radial-gradient(circle, hsl(var(--accent) / 0.55), transparent 65%)",
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                }}
+              />
+              <span className="relative animate-float-y">{isTiger ? "🐅" : "🐐"}</span>
+            </span>
             {turnLabel}
             {isAIThinking && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="AI thinking" />}
           </h3>
