@@ -5,11 +5,13 @@ import { useState } from "react";
 import { Tutorial } from "@/components/game/Tutorial";
 import { PlayWithAIDialog } from "@/components/game/PlayWithAIDialog";
 import { InviteFriendDialog } from "@/components/game/InviteFriendDialog";
+import { PassAndPlayDialog } from "@/components/game/PassAndPlayDialog";
 
 const Index = () => {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [ppOpen, setPpOpen] = useState(false);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
@@ -42,15 +44,13 @@ const Index = () => {
         </Button>
 
         <Button
-          asChild
+          onClick={() => setPpOpen(true)}
           size="lg"
           variant="outline"
           className="w-full h-14 text-base bg-card/70 justify-start gap-3 border-2"
         >
-          <Link to="/play?mode=pass-and-play">
-            <Users className="h-5 w-5 text-accent" />
-            <span>Pass &amp; Play</span>
-          </Link>
+          <Users className="h-5 w-5 text-accent" />
+          <span>Pass &amp; Play</span>
         </Button>
 
         <Button
@@ -92,6 +92,7 @@ const Index = () => {
 
       <Tutorial open={tutorialOpen} onOpenChange={setTutorialOpen} />
       <PlayWithAIDialog open={aiOpen} onOpenChange={setAiOpen} />
+      <PassAndPlayDialog open={ppOpen} onOpenChange={setPpOpen} />
       <InviteFriendDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </main>
   );
