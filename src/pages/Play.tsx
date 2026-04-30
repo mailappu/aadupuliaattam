@@ -110,6 +110,14 @@ const Play = () => {
             debug={debug}
             onNodeClick={game.onNodeClick}
           />
+          {game.scoredDestinations.length > 0 && (
+            <div className="mx-auto mt-2 max-w-[560px] flex items-center justify-center gap-3 text-[11px] text-muted-foreground">
+              <span className="uppercase tracking-wider">Strategy</span>
+              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: "hsl(var(--node-threat))" }} /> weak</span>
+              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: "hsl(var(--accent))" }} /> ok</span>
+              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full" style={{ background: "hsl(var(--node-highlight))" }} /> strong</span>
+            </div>
+          )}
           {debug && (
             <div className="mx-auto mt-2 max-w-[560px] rounded-md border border-dashed border-accent/60 bg-card/80 px-3 py-2 text-[11px] font-mono text-muted-foreground flex flex-wrap items-center justify-between gap-2">
               <span className="flex items-center gap-1.5"><Bug className="h-3 w-3" /> debug · turn={game.state.turn} · phase={game.state.phase} · placed={game.state.goatsPlaced} · captured={game.state.goatsCaptured}</span>
