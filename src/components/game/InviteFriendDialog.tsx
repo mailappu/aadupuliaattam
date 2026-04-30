@@ -46,7 +46,7 @@ export function InviteFriendDialog({
             code: newCode,
             host_id: playerId,
             host_side: chosen,
-            state: createInitialState() as unknown as Record<string, unknown>,
+            state: JSON.parse(JSON.stringify(createInitialState())),
             status: "waiting",
           },
         ])
