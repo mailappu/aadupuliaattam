@@ -15,11 +15,11 @@ const PREFIX = "v1:";
 function toBase64Url(bytes: Uint8Array): string {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 function fromBase64Url(str: string): Uint8Array {
   const pad = str.length % 4 === 0 ? "" : "=".repeat(4 - (str.length % 4));
-  const b = atob(str.replaceAll("-", "+").replaceAll("_", "/") + pad);
+  const b = atob(str.replace(/-/g, "+").replace(/_/g, "/") + pad);
   const out = new Uint8Array(b.length);
   for (let i = 0; i < b.length; i++) out[i] = b.charCodeAt(i);
   return out;
