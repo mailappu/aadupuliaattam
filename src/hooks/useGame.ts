@@ -65,24 +65,41 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [capturedAt, setCapturedAt] = useState<NodeId | null>(null);
   const aiTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasHydrated = useRef(false);
 
-  // Load saved game once
+  // Load saved game once — only resume if it's a meaningful in-progress game,
+  // and ask the player first instead of silently overwriting a fresh start.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
+      if (!raw) { hasHydrated.current = true; return; }
       const saved = JSON.parse(raw) as { state: GameState; settings: GameSettings };
-      if (saved?.state?.cells?.length === 23) {
-        setState(saved.state);
-        setSettings((s) => ({ ...s, ...saved.settings }));
+      const s = saved?.state;
+      const inProgress =
+        s?.cells?.length === 23 &&
+        !s.winner &&
+        s.phase !== "ended" &&
+        (s.history?.length ?? 0) > 0;
+      if (inProgress) {
+        const resume = window.confirm("Resume your last game?");
+        if (resume) {
+          setState(saved.state);
+          setSettings((cur) => ({ ...cur, ...saved.settings }));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
     } catch {
       /* ignore */
+    } finally {
+      hasHydrated.current = true;
     }
   }, []);
 
-  // Persist
+  // Persist (skip until hydration completes so we don't overwrite the saved
+  // game with the fresh initial state during the first render).
   useEffect(() => {
+    if (!hasHydrated.current) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, settings }));
     } catch {
