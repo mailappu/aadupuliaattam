@@ -13,7 +13,7 @@ import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
 import { planAnimation, type AnimationStep } from "@/animations/animationEngine";
 
-const STORAGE_KEY = "apa.savegame.v1";
+const STORAGE_KEY = "apa.savegame.v2";
 
 export type Mode = "vs-ai-tigers" | "vs-ai-goats" | "pass-and-play";
 
@@ -253,6 +253,12 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     setSelected(null);
     setHint(null);
     setCapturedAt(null);
+    setAnimation(null);
+    setIsAIThinking(false);
+    if (aiTimeout.current) {
+      clearTimeout(aiTimeout.current);
+      aiTimeout.current = null;
+    }
     setSettings((s) => ({
       ...s,
       mode: mode ?? s.mode,
