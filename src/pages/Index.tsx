@@ -87,7 +87,16 @@ const Index = () => {
       </div>
 
       <footer className="mt-16 text-xs text-muted-foreground">
-        Crafted with ❤️ — a tribute to the bazaars of Tamil Nadu.
+        Crafted with ❤️ by{" "}
+        <a
+          href="https://www.linkedin.com/in/pradeep-kumars/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-accent transition-colors"
+        >
+          Pradeep
+        </a>{" "}
+        — a tribute to the bazaars of Tamil Nadu.
       </footer>
 
       <Tutorial open={tutorialOpen} onOpenChange={setTutorialOpen} />
