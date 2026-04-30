@@ -132,7 +132,7 @@ export function InviteFriendDialog({
                   [
                     { id: "goat", label: "Goats", emoji: "🐐" },
                     { id: "tiger", label: "Tigers", emoji: "🐅" },
-                    { id: "random", label: "Random", emoji: "🎲" },
+                    { id: "random", label: "Random", emoji: "🎲", sub: "Surprise me" },
                   ] as { id: Side; label: string; emoji: string }[]
                 ).map((opt) => (
                   <Label

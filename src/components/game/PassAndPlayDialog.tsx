@@ -79,7 +79,7 @@ export function PassAndPlayDialog({
                 [
                   { id: "goat", label: "Goats", emoji: "🐐", sub: "15 pieces" },
                   { id: "tiger", label: "Tigers", emoji: "🐅", sub: "3 pieces" },
-                  { id: "random", label: "Random", emoji: "🎲", sub: "Coin flip" },
+                  { id: "random", label: "Random", emoji: "🎲", sub: "Surprise me" },
                 ] as { id: Side; label: string; emoji: string; sub: string }[]
               ).map((opt) => (
                 <Label
