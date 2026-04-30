@@ -41,13 +41,15 @@ export function InviteFriendDialog({
       const newCode = makeRoomCode();
       const { data, error } = await supabase
         .from("rooms")
-        .insert({
-          code: newCode,
-          host_id: playerId,
-          host_side: chosen,
-          state: createInitialState() as unknown as Record<string, unknown>,
-          status: "waiting",
-        })
+        .insert([
+          {
+            code: newCode,
+            host_id: playerId,
+            host_side: chosen,
+            state: createInitialState() as unknown as Record<string, unknown>,
+            status: "waiting",
+          },
+        ])
         .select()
         .single();
       if (error || !data) throw error ?? new Error("Could not create room");
