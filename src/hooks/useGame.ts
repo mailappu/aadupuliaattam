@@ -34,6 +34,7 @@ export interface UseGameReturn {
   isAIThinking: boolean;
   lastMove: Move | null;
   capturedAt: NodeId | null;            // node id where a capture flash should play
+  animation: AnimationStep | null;      // visual replay descriptor for the latest move
   onNodeClick: (id: NodeId) => void;
   newGame: (mode?: Mode, difficulty?: Difficulty) => void;
   requestHint: () => void;
