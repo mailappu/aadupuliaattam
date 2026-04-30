@@ -2,104 +2,131 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Aadu Puli Attam — design system
+   Inspired by parchment + teak + saffron palette.
+   All colors are HSL. Define tokens here, use semantic classes everywhere. */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 38 45% 92%;            /* warm parchment */
+    --foreground: 28 30% 18%;             /* deep teak text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 40 55% 96%;
+    --card-foreground: 28 30% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 55% 96%;
+    --popover-foreground: 28 30% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand */
+    --primary: 28 65% 38%;                /* teak brown */
+    --primary-foreground: 40 60% 96%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 38 50% 86%;
+    --secondary-foreground: 28 35% 22%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 38 35% 88%;
+    --muted-foreground: 28 18% 38%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 38 80% 55%;                 /* saffron */
+    --accent-foreground: 28 45% 18%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 40 60% 96%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 32 28% 78%;
+    --input: 32 28% 78%;
+    --ring: 38 80% 55%;
 
-    --radius: 0.5rem;
+    --radius: 0.85rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Game tokens */
+    --board-bg: 36 55% 78%;
+    --board-line: 28 45% 28%;
+    --node: 40 50% 96%;
+    --node-ring: 28 35% 30%;
+    --node-highlight: 142 55% 45%;        /* legal move green */
+    --node-threat: 0 70% 52%;             /* danger red */
+    --node-selected: 38 90% 55%;          /* saffron */
+    --tiger: 22 75% 32%;                  /* burnt sienna */
+    --tiger-ink: 24 60% 14%;
+    --goat: 40 30% 96%;
+    --goat-ink: 28 35% 28%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Effects */
+    --gradient-bg: linear-gradient(135deg, hsl(38 45% 94%) 0%, hsl(36 55% 86%) 100%);
+    --gradient-saffron: linear-gradient(135deg, hsl(38 85% 60%) 0%, hsl(22 80% 48%) 100%);
+    --gradient-teak: linear-gradient(135deg, hsl(28 60% 38%) 0%, hsl(24 55% 28%) 100%);
+    --shadow-soft: 0 8px 24px -8px hsl(28 40% 25% / 0.18);
+    --shadow-piece: 0 3px 6px hsl(28 40% 15% / 0.35), inset 0 1px 0 hsl(40 60% 100% / 0.15);
+    --shadow-elev: 0 24px 48px -16px hsl(28 40% 20% / 0.25);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar (kept default for shadcn) */
+    --sidebar-background: 40 55% 96%;
+    --sidebar-foreground: 28 30% 18%;
+    --sidebar-primary: 28 65% 38%;
+    --sidebar-primary-foreground: 40 60% 96%;
+    --sidebar-accent: 38 50% 86%;
+    --sidebar-accent-foreground: 28 35% 22%;
+    --sidebar-border: 32 28% 78%;
+    --sidebar-ring: 38 80% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 28 25% 10%;
+    --foreground: 40 40% 92%;
+    --card: 28 25% 13%;
+    --card-foreground: 40 40% 92%;
+    --popover: 28 25% 13%;
+    --popover-foreground: 40 40% 92%;
+    --primary: 38 80% 60%;
+    --primary-foreground: 28 30% 12%;
+    --secondary: 28 20% 18%;
+    --secondary-foreground: 40 40% 92%;
+    --muted: 28 18% 18%;
+    --muted-foreground: 38 20% 65%;
+    --accent: 38 80% 55%;
+    --accent-foreground: 28 30% 12%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 40 60% 96%;
+    --border: 28 18% 22%;
+    --input: 28 18% 22%;
+    --ring: 38 80% 55%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --board-bg: 28 30% 22%;
+    --board-line: 38 60% 70%;
+    --node: 40 30% 88%;
+    --node-ring: 28 25% 14%;
+    --gradient-bg: linear-gradient(135deg, hsl(28 25% 10%) 0%, hsl(28 30% 14%) 100%);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
+  html, body, #root { height: 100%; }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--gradient-bg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-attachment: fixed;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .text-saffron { color: hsl(var(--accent)); }
+  .bg-saffron-gradient { background: var(--gradient-saffron); }
+  .bg-teak-gradient { background: var(--gradient-teak); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-elev { box-shadow: var(--shadow-elev); }
+  .paper-texture {
+    background-image:
+      radial-gradient(hsl(28 30% 30% / 0.04) 1px, transparent 1px),
+      radial-gradient(hsl(28 30% 30% / 0.03) 1px, transparent 1px);
+    background-size: 18px 18px, 32px 32px;
+    background-position: 0 0, 9px 9px;
   }
 }
