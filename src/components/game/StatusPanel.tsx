@@ -20,11 +20,11 @@ export function StatusPanel({ state, isAIThinking }: StatusPanelProps) {
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Turn</p>
           <h3 className="font-display text-2xl flex items-center gap-2">
-            <span className="relative inline-flex items-center justify-center" aria-hidden>
+            <span className="relative inline-flex items-center justify-center w-9 h-9" aria-hidden>
               {/* Pulsing glow ring behind the active emoji */}
               <span
                 key={state.turn /* remount → restart pulse on turn flip */}
-                className="absolute inset-0 -m-1 rounded-full animate-pulse-ring"
+                className="absolute inset-0 rounded-full animate-pulse-ring"
                 style={{
                   background: isTiger
                     ? "radial-gradient(circle, hsl(var(--tiger) / 0.45), transparent 65%)"
@@ -33,7 +33,7 @@ export function StatusPanel({ state, isAIThinking }: StatusPanelProps) {
                   transformOrigin: "center",
                 }}
               />
-              <span className="relative animate-float-y">{isTiger ? "🐅" : "🐐"}</span>
+              <span className="relative animate-float-y text-2xl leading-none">{isTiger ? "🐅" : "🐐"}</span>
             </span>
             {turnLabel}
             {isAIThinking && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="AI thinking" />}
