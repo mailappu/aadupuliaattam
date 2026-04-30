@@ -141,6 +141,15 @@ function BoardImpl({
           ))}
         </g>
 
+        {/* Debug overlay: every adjacency edge in faint cyan to verify graph topology. */}
+        {debug && (
+          <g stroke="hsl(190 80% 50%)" strokeWidth={0.18} strokeDasharray="0.6 0.6" opacity={0.55}>
+            {RENDER_EDGES.map(([a, b]) => (
+              <line key={`dbg-${a}-${b}`} x1={NODES[a].x} y1={NODES[a].y} x2={NODES[b].x} y2={NODES[b].y} />
+            ))}
+          </g>
+        )}
+
         {/* Last-move trace */}
         {lastFrom !== null && lastTo !== null && (
           <line
