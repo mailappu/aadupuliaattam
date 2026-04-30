@@ -103,6 +103,7 @@ const Play = () => {
             showOverlay={game.settings.showOverlay}
             capturedAt={game.capturedAt}
             lastMove={game.lastMove}
+            animation={game.animation}
             onNodeClick={game.onNodeClick}
           />
           <p className="text-center text-xs text-muted-foreground mt-3 px-4">
