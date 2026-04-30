@@ -11,6 +11,7 @@ import {
 import { chooseAIMove, type Difficulty } from "@/game/ai";
 import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
+import { planAnimation, type AnimationStep } from "@/animations/animationEngine";
 
 const STORAGE_KEY = "apa.savegame.v1";
 
