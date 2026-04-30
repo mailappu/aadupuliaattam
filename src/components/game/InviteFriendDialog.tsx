@@ -130,10 +130,10 @@ export function InviteFriendDialog({
               >
                 {(
                   [
-                    { id: "goat", label: "Goats", emoji: "🐐" },
-                    { id: "tiger", label: "Tigers", emoji: "🐅" },
+                    { id: "goat", label: "Goats", emoji: "🐐", sub: "15 pieces" },
+                    { id: "tiger", label: "Tigers", emoji: "🐅", sub: "3 pieces" },
                     { id: "random", label: "Random", emoji: "🎲", sub: "Surprise me" },
-                  ] as { id: Side; label: string; emoji: string }[]
+                  ] as { id: Side; label: string; emoji: string; sub: string }[]
                 ).map((opt) => (
                   <Label
                     key={opt.id}
@@ -149,6 +149,7 @@ export function InviteFriendDialog({
                       {opt.emoji}
                     </span>
                     <span className="font-display text-sm">{opt.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{opt.sub}</span>
                   </Label>
                 ))}
               </RadioGroup>
