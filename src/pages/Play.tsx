@@ -16,14 +16,17 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Play = () => {
   const [params] = useSearchParams();
   const initialMode = (params.get("mode") as Mode | null) ?? "vs-ai-tigers";
-  const game = useGame(initialMode);
+  const initialDifficulty = (params.get("difficulty") as "easy" | "medium" | "hard" | null) ?? "medium";
+  const game = useGame(initialMode, initialDifficulty);
   const [overOpen, setOverOpen] = useState(false);
   const [tutOpen, setTutOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (initialMode && game.settings.mode !== initialMode) game.newGame(initialMode);
+    if (initialMode && (game.settings.mode !== initialMode || game.settings.difficulty !== initialDifficulty)) {
+      game.newGame(initialMode, initialDifficulty);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
