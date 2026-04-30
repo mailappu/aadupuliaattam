@@ -9,9 +9,10 @@ import { Tutorial } from "@/components/game/Tutorial";
 import { MuteToggle } from "@/components/game/MuteToggle";
 import { SettingsDialog } from "@/components/game/SettingsDialog";
 import { useGame, type Mode } from "@/hooks/useGame";
+import { useDebugMode } from "@/hooks/useDebugMode";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowLeft, GraduationCap, Wrench } from "lucide-react";
+import { ArrowLeft, GraduationCap, Wrench, Bug } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Play = () => {
@@ -26,6 +27,7 @@ const Play = () => {
   const [tutOpen, setTutOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const isMobile = useIsMobile();
+  const [debug, setDebug] = useDebugMode();
 
   useEffect(() => {
     if (initialMode && (game.settings.mode !== initialMode || game.settings.difficulty !== initialDifficulty)) {
@@ -98,14 +100,22 @@ const Play = () => {
             state={game.state}
             selected={game.selected}
             destinations={game.destinations}
+            scoredDestinations={game.scoredDestinations}
             hint={game.hint}
             showHints={game.settings.showHints || game.hint !== null}
             showOverlay={game.settings.showOverlay}
             capturedAt={game.capturedAt}
             lastMove={game.lastMove}
             animation={game.animation}
+            debug={debug}
             onNodeClick={game.onNodeClick}
           />
+          {debug && (
+            <div className="mx-auto mt-2 max-w-[560px] rounded-md border border-dashed border-accent/60 bg-card/80 px-3 py-2 text-[11px] font-mono text-muted-foreground flex flex-wrap items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5"><Bug className="h-3 w-3" /> debug · turn={game.state.turn} · phase={game.state.phase} · placed={game.state.goatsPlaced} · captured={game.state.goatsCaptured}</span>
+              <button onClick={() => setDebug(false)} className="underline">close</button>
+            </div>
+          )}
           <p className="text-center text-xs text-muted-foreground mt-3 px-4">
             {game.state.phase === "placement" && game.state.turn === "goat"
               ? "Tap any empty point to place a goat."

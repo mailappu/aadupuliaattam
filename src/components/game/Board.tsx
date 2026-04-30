@@ -9,12 +9,16 @@ interface BoardProps {
   state: GameState;
   selected: NodeId | null;
   destinations: { to: NodeId; capture: boolean }[];
+  /** Optional move-quality scores (0..1) for the selected piece's destinations. */
+  scoredDestinations?: { to: NodeId; capture: boolean; quality: number }[];
   hint: Move | null;
   showHints: boolean;
   showOverlay: boolean;
   capturedAt: NodeId | null;
   lastMove: Move | null;
   animation?: AnimationStep | null;
+  /** Debug overlay: draws every adjacency edge faintly + node ids. */
+  debug?: boolean;
   onNodeClick: (id: NodeId) => void;
 }
 
@@ -75,15 +79,18 @@ function BoardImpl({
   state,
   selected,
   destinations,
+  scoredDestinations,
   hint,
   showHints,
   showOverlay,
   capturedAt,
   lastMove,
   animation = null,
+  debug = false,
   onNodeClick,
 }: BoardProps) {
   const destSet = new Map(destinations.map((d) => [d.to, d.capture]));
+  const scoreMap = new Map((scoredDestinations ?? []).map((d) => [d.to, d.quality]));
   const vulnerable = showOverlay ? new Set(vulnerableGoats(state)) : new Set<NodeId>();
   const hintFrom = hint && "from" in hint ? hint.from : null;
   const hintTo = hint && "to" in hint ? hint.to : null;
@@ -133,6 +140,15 @@ function BoardImpl({
             <line key={`${a}-${b}`} x1={NODES[a].x} y1={NODES[a].y} x2={NODES[b].x} y2={NODES[b].y} />
           ))}
         </g>
+
+        {/* Debug overlay: every adjacency edge in faint cyan to verify graph topology. */}
+        {debug && (
+          <g stroke="hsl(190 80% 50%)" strokeWidth={0.18} strokeDasharray="0.6 0.6" opacity={0.55}>
+            {RENDER_EDGES.map(([a, b]) => (
+              <line key={`dbg-${a}-${b}`} x1={NODES[a].x} y1={NODES[a].y} x2={NODES[b].x} y2={NODES[b].y} />
+            ))}
+          </g>
+        )}
 
         {/* Last-move trace */}
         {lastFrom !== null && lastTo !== null && (
@@ -228,6 +244,36 @@ function BoardImpl({
               />
               {isSelected && (
                 <circle r={3.0} fill="none" stroke="hsl(var(--node-selected))" strokeWidth={0.6} className="pointer-events-none" />
+              )}
+              {/* Strategy overlay: quality ring on legal destinations.
+                  Hue lerps red(0°) → amber(45°) → green(120°) by quality. */}
+              {scoreMap.has(n.id) && (() => {
+                const q = scoreMap.get(n.id)!;
+                const hue = Math.round(q * 120); // 0=red, 60=yellow, 120=green
+                return (
+                  <circle
+                    r={4.4}
+                    fill="none"
+                    stroke={`hsl(${hue} 70% 45%)`}
+                    strokeWidth={0.55}
+                    opacity={0.85}
+                    className="pointer-events-none"
+                  />
+                );
+              })()}
+              {/* Debug: node id label */}
+              {debug && (
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={1.6}
+                  fill="hsl(190 80% 30%)"
+                  y={-3.4}
+                  className="pointer-events-none"
+                  style={{ fontFamily: "monospace" }}
+                >
+                  {n.id}
+                </text>
               )}
             </g>
           );
