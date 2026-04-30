@@ -50,19 +50,19 @@ export function ControlsPanel({ settings, onChange, onHint, onUndo, onNewGame, c
 
   return (
     <Card className="p-4 shadow-soft bg-card/80 backdrop-blur-sm space-y-4">
-      <div className={`grid gap-3 ${settings.mode === "pass-and-play" ? "grid-cols-1" : "grid-cols-2"}`}>
-        <div className="space-y-1.5">
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Mode</Label>
-          <Select value={settings.mode} onValueChange={(v) => set("mode", v as Mode)}>
-            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="vs-ai-tigers">Play as Goats vs AI</SelectItem>
-              <SelectItem value="vs-ai-goats">Play as Tigers vs AI</SelectItem>
-              <SelectItem value="pass-and-play">Pass &amp; Play</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {settings.mode !== "pass-and-play" && (
+      {settings.mode !== "pass-and-play" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Mode</Label>
+            <Select value={settings.mode} onValueChange={(v) => set("mode", v as Mode)}>
+              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vs-ai-tigers">Play as Goats vs AI</SelectItem>
+                <SelectItem value="vs-ai-goats">Play as Tigers vs AI</SelectItem>
+                <SelectItem value="pass-and-play">Pass &amp; Play</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-1.5">
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Difficulty</Label>
             <Select value={settings.difficulty} onValueChange={(v) => set("difficulty", v as Difficulty)}>
@@ -74,8 +74,8 @@ export function ControlsPanel({ settings, onChange, onHint, onUndo, onNewGame, c
               </SelectContent>
             </Select>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-3 rounded-md bg-secondary/60 px-3 py-2">
         <Label htmlFor="hints" className="flex items-center gap-2 text-sm cursor-pointer">
