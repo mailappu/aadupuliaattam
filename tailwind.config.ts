@@ -69,6 +69,15 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-4px)" },
         },
+        "depart-pulse": {
+          "0%":   { transform: "scale(0.6)", opacity: "0.9" },
+          "100%": { transform: "scale(2.4)", opacity: "0" },
+        },
+        "land-glow": {
+          "0%":   { transform: "scale(0.4)", opacity: "0" },
+          "40%":  { transform: "scale(1.0)", opacity: "0.95" },
+          "100%": { transform: "scale(1.8)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -78,6 +87,8 @@ export default {
         "pulse-ring": "pulse-ring 1.4s ease-out infinite",
         "capture-flash": "capture-flash 0.55s ease-in forwards",
         "float-y": "float-y 3s ease-in-out infinite",
+        "depart-pulse": "depart-pulse 0.5s ease-out forwards",
+        "land-glow":   "land-glow 0.55s ease-out forwards",
       },
     },
   },
