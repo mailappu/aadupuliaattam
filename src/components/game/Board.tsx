@@ -222,7 +222,9 @@ function BoardImpl({
                 aria-label={`Node ${n.id}`}
                 style={{ cursor: "pointer", outline: "none" }}
               />
-              {(isLegalDest || isHintTarget) && (
+              {/* Suppress the green legal-move pulse when a quality ring is
+                  already drawn on this node — avoids double-ring noise. */}
+              {(isLegalDest || isHintTarget) && !scoreMap.has(n.id) && (
                 <circle
                   r={3.6}
                   fill="none"
@@ -245,18 +247,25 @@ function BoardImpl({
               {isSelected && (
                 <circle r={3.0} fill="none" stroke="hsl(var(--node-selected))" strokeWidth={0.6} className="pointer-events-none" />
               )}
-              {/* Strategy overlay: quality ring on legal destinations.
-                  Hue lerps red(0°) → amber(45°) → green(120°) by quality. */}
+              {/* Strategy overlay: quality ring lerping our threat→accent→
+                  highlight design tokens, not raw HSL. */}
               {scoreMap.has(n.id) && (() => {
                 const q = scoreMap.get(n.id)!;
-                const hue = Math.round(q * 120); // 0=red, 60=yellow, 120=green
+                // 3-stop palette using existing tokens: weak (threat),
+                // neutral (accent/saffron), strong (highlight/green).
+                const stroke =
+                  q < 0.34
+                    ? "hsl(var(--node-threat))"
+                    : q < 0.67
+                      ? "hsl(var(--accent))"
+                      : "hsl(var(--node-highlight))";
                 return (
                   <circle
                     r={4.4}
                     fill="none"
-                    stroke={`hsl(${hue} 70% 45%)`}
-                    strokeWidth={0.55}
-                    opacity={0.85}
+                    stroke={stroke}
+                    strokeWidth={0.6}
+                    opacity={0.9}
                     className="pointer-events-none"
                   />
                 );
