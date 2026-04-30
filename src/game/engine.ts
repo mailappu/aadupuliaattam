@@ -106,7 +106,29 @@ export function legalMoves(state: GameState): Move[] {
 }
 
 export function legalMovesFrom(state: GameState, from: NodeId): Move[] {
-  return legalMoves(state).filter((m) => "from" in m && m.from === from);
+  if (state.phase === "ended") return [];
+  const piece = state.cells[from];
+  if (piece === "empty") return [];
+  if (piece !== state.turn) return [];
+
+  const out: Move[] = [];
+  if (state.turn === "goat") {
+    if (state.phase === "placement") return out; // goats place anywhere, not "from"
+    for (const n of ADJACENCY[from]) {
+      if (state.cells[n] === "empty") out.push({ kind: "move", from, to: n });
+    }
+    return out;
+  }
+  // tiger
+  for (const n of ADJACENCY[from]) {
+    if (state.cells[n] === "empty") out.push({ kind: "move", from, to: n });
+  }
+  for (const j of JUMPS[from]) {
+    if (state.cells[j.over] === "goat" && state.cells[j.land] === "empty") {
+      out.push({ kind: "capture", from, over: j.over, to: j.land });
+    }
+  }
+  return out;
 }
 
 export function legalDestinations(state: GameState, from: NodeId): { to: NodeId; capture: boolean }[] {
