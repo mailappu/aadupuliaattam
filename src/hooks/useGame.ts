@@ -9,6 +9,7 @@ import {
   type Player,
 } from "@/game/engine";
 import { chooseAIMove, type Difficulty } from "@/game/ai";
+import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
 
 const STORAGE_KEY = "apa.savegame.v1";
