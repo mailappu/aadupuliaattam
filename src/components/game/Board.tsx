@@ -245,6 +245,36 @@ function BoardImpl({
               {isSelected && (
                 <circle r={3.0} fill="none" stroke="hsl(var(--node-selected))" strokeWidth={0.6} className="pointer-events-none" />
               )}
+              {/* Strategy overlay: quality ring on legal destinations.
+                  Hue lerps red(0°) → amber(45°) → green(120°) by quality. */}
+              {scoreMap.has(n.id) && (() => {
+                const q = scoreMap.get(n.id)!;
+                const hue = Math.round(q * 120); // 0=red, 60=yellow, 120=green
+                return (
+                  <circle
+                    r={4.4}
+                    fill="none"
+                    stroke={`hsl(${hue} 70% 45%)`}
+                    strokeWidth={0.55}
+                    opacity={0.85}
+                    className="pointer-events-none"
+                  />
+                );
+              })()}
+              {/* Debug: node id label */}
+              {debug && (
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={1.6}
+                  fill="hsl(190 80% 30%)"
+                  y={-3.4}
+                  className="pointer-events-none"
+                  style={{ fontFamily: "monospace" }}
+                >
+                  {n.id}
+                </text>
+              )}
             </g>
           );
         })}
