@@ -14,7 +14,7 @@ interface BoardProps {
   showOverlay: boolean;
   capturedAt: NodeId | null;
   lastMove: Move | null;
-  animation: AnimationStep | null;
+  animation?: AnimationStep | null;
   onNodeClick: (id: NodeId) => void;
 }
 
@@ -80,6 +80,7 @@ function BoardImpl({
   showOverlay,
   capturedAt,
   lastMove,
+  animation = null,
   onNodeClick,
 }: BoardProps) {
   const destSet = new Map(destinations.map((d) => [d.to, d.capture]));
