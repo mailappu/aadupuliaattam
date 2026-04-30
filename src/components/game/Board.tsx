@@ -9,12 +9,16 @@ interface BoardProps {
   state: GameState;
   selected: NodeId | null;
   destinations: { to: NodeId; capture: boolean }[];
+  /** Optional move-quality scores (0..1) for the selected piece's destinations. */
+  scoredDestinations?: { to: NodeId; capture: boolean; quality: number }[];
   hint: Move | null;
   showHints: boolean;
   showOverlay: boolean;
   capturedAt: NodeId | null;
   lastMove: Move | null;
   animation?: AnimationStep | null;
+  /** Debug overlay: draws every adjacency edge faintly + node ids. */
+  debug?: boolean;
   onNodeClick: (id: NodeId) => void;
 }
 
@@ -75,15 +79,18 @@ function BoardImpl({
   state,
   selected,
   destinations,
+  scoredDestinations,
   hint,
   showHints,
   showOverlay,
   capturedAt,
   lastMove,
   animation = null,
+  debug = false,
   onNodeClick,
 }: BoardProps) {
   const destSet = new Map(destinations.map((d) => [d.to, d.capture]));
+  const scoreMap = new Map((scoredDestinations ?? []).map((d) => [d.to, d.quality]));
   const vulnerable = showOverlay ? new Set(vulnerableGoats(state)) : new Set<NodeId>();
   const hintFrom = hint && "from" in hint ? hint.from : null;
   const hintTo = hint && "to" in hint ? hint.to : null;
