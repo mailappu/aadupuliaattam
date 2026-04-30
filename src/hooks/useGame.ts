@@ -287,7 +287,10 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
     if (state.phase === "ended") return;
     const player: Player = state.turn;
     const decision = chooseAIMove(state, player, "hard");
-    if (decision) setHint(decision.move);
+    if (decision) {
+      setHint(decision.move);
+      sfx.hint();
+    }
   }, [state]);
 
   const undo = useCallback(() => {
