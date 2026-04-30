@@ -7,10 +7,11 @@ import { OverlayPanel } from "@/components/game/OverlayPanel";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { Tutorial } from "@/components/game/Tutorial";
 import { MuteToggle } from "@/components/game/MuteToggle";
+import { SettingsDialog } from "@/components/game/SettingsDialog";
 import { useGame, type Mode } from "@/hooks/useGame";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowLeft, GraduationCap, Settings2 } from "lucide-react";
+import { ArrowLeft, GraduationCap, Wrench } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Play = () => {
