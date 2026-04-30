@@ -62,6 +62,7 @@ const Play = () => {
           <Button variant="ghost" size="icon" onClick={() => setTutOpen(true)} aria-label="Tutorial">
             <GraduationCap className="h-5 w-5" />
           </Button>
+          <SettingsDialog settings={game.settings} onChange={game.setSettings} />
         </div>
       </header>
 
