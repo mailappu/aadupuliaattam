@@ -8,7 +8,7 @@ import {
   type Move,
   type Player,
 } from "@/game/engine";
-import { chooseAIMove, type Difficulty } from "@/game/ai";
+import { chooseAIMove, evaluate, type Difficulty } from "@/game/ai";
 import { sfx, vibrate } from "@/lib/sfx";
 import type { NodeId } from "@/game/board";
 import { planAnimation, type AnimationStep } from "@/animations/animationEngine";
@@ -30,6 +30,8 @@ export interface UseGameReturn {
   setSettings: (s: GameSettings) => void;
   selected: NodeId | null;
   destinations: { to: NodeId; capture: boolean }[];
+  /** Strategy overlay: scored destinations for the selected piece (0..1). */
+  scoredDestinations: { to: NodeId; capture: boolean; quality: number }[];
   hint: Move | null;
   isAIThinking: boolean;
   lastMove: Move | null;
