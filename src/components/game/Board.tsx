@@ -143,6 +143,36 @@ function BoardImpl({
           />
         )}
 
+        {/* Animation feedback: depart pulse on origin, land glow on destination.
+            Keyed by step.id so React remounts the circles per move and replays
+            the CSS animations cleanly. Pure visual; no engine dependency. */}
+        {animation && animation.origin !== null && (
+          <circle
+            key={`depart-${animation.id}`}
+            cx={NODES[animation.origin].x}
+            cy={NODES[animation.origin].y}
+            r={2.6}
+            fill="none"
+            stroke={animation.arc === "lunge" ? "hsl(var(--node-threat))" : "hsl(var(--node-selected))"}
+            strokeWidth={0.7}
+            className="animate-depart-pulse origin-center pointer-events-none"
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          />
+        )}
+        {animation && (
+          <circle
+            key={`land-${animation.id}`}
+            cx={NODES[animation.destination].x}
+            cy={NODES[animation.destination].y}
+            r={2.4}
+            fill="none"
+            stroke="hsl(var(--node-highlight))"
+            strokeWidth={0.7}
+            className="animate-land-glow origin-center pointer-events-none"
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          />
+        )}
+
         {/* Hint trace */}
         {showHints && hintFrom !== null && hintTo !== null && (
           <line
