@@ -55,7 +55,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_room_state: {
+        Args: {
+          p_player_id: string
+          p_room_id: string
+          p_state: Json
+          p_status: string
+        }
+        Returns: {
+          code: string
+          created_at: string
+          guest_id: string | null
+          host_id: string
+          host_side: string
+          id: string
+          state: Json
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rooms"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      join_room: {
+        Args: { p_code: string; p_player_id: string }
+        Returns: {
+          code: string
+          created_at: string
+          guest_id: string | null
+          host_id: string
+          host_side: string
+          id: string
+          state: Json
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rooms"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
