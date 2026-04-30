@@ -46,6 +46,25 @@ export function createInitialState(): GameState {
   };
 }
 
+// ---- Public state-machine helpers ----------------------------------------
+// Spec-aligned aliases (getValidMoves / getPhase / isGameOver) so consumers
+// outside the engine can speak the documented vocabulary without touching
+// internals.
+
+export function getPhase(state: GameState): Phase {
+  return state.phase;
+}
+
+export function isGameOver(state: GameState): boolean {
+  return state.phase === "ended" || state.winner !== null;
+}
+
+export function getValidMoves(state: GameState, player?: Player): Move[] {
+  const moves = legalMoves(state);
+  if (!player) return moves;
+  return state.turn === player ? moves : [];
+}
+
 // ---- Move generation -----------------------------------------------------
 
 export function legalMoves(state: GameState): Move[] {
@@ -112,10 +131,18 @@ export function applyMove(state: GameState, move: Move): GameState {
     cells[move.to] = "goat";
     goatsPlaced += 1;
   } else if (move.kind === "move") {
+    // State-machine guard: goats cannot slide until placement phase ends.
+    if (state.turn === "goat" && state.phase === "placement") {
+      throw new Error("Goats cannot slide during placement phase");
+    }
     if (cells[move.from] !== (state.turn === "goat" ? "goat" : "tiger")) {
       throw new Error("Wrong piece");
     }
     if (cells[move.to] !== "empty") throw new Error("Destination occupied");
+    // Adjacency guard: a slide must follow a printed board edge.
+    if (!ADJACENCY[move.from].includes(move.to)) {
+      throw new Error("Move is not along a board edge");
+    }
     cells[move.to] = cells[move.from];
     cells[move.from] = "empty";
   } else if (move.kind === "capture") {
