@@ -115,6 +115,19 @@ export function useGame(initialMode: Mode = "vs-ai-tigers", initialDifficulty: D
   const aiPlayer = aiPlayerFor(settings.mode);
   const humanPlayer = humanPlayerFor(settings.mode);
 
+  // State-leak guard: clear selection/hint whenever the turn flips OR the
+  // currently selected node no longer holds the active player's piece. This
+  // prevents stale highlights surviving across AI moves, undos, or captures
+  // that removed the selected piece.
+  useEffect(() => {
+    if (selected === null) return;
+    const ownPiece = state.turn === "goat" ? "goat" : "tiger";
+    if (state.cells[selected] !== ownPiece) {
+      setSelected(null);
+      setHint(null);
+    }
+  }, [state.turn, state.cells, selected]);
+
   const destinations = useMemo(
     () => (selected !== null ? legalDestinations(state, selected) : []),
     [selected, state],
